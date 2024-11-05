@@ -87,4 +87,13 @@ I am also experimenting with new data types that I have never had the chance to 
 
 So far, all of these commands work but are lacking content (as previously mentioned, it is the skeleton of the game right now)
 
- 
+Continuing on, I have now added a failsafe for the user. Because the commands are all displayed as being uppercase but all of the commands require a lowercase input, I made it so that whatever the user inputs, it will take that string and make it all lowercase. This was harder that I initially thought because I wasn't able to use the transform(tolower). I am not sure why but I managed to get a working solution after following this C++ LowerCase page.
+
+![image (8)](https://github.com/user-attachments/assets/621b10f2-871e-4227-ba56-4c6fd4571b0a) ![image (9)](https://github.com/user-attachments/assets/62f610b1-2a87-41f5-b357-df14eaa73712)
+
+This code works because the ASCII character encoding for uppercase letters range from 65-90. By adding 32 to an uppercase character, it moves it into the range of lowercase letters, therefore, it checks if the string has characters between A and Z then for each letter, it adds 32 to it to make it lowercase.
+
+Now I have gotten this to work, I am continuing with different parts of the program. Right now, I would like to get the inventory and shop to actually work. This involves me adding many different functions including the inventory system, use item, money management, etc. This means that it is much easier for me to add items and modify them.
+
+![image (10)](https://github.com/user-attachments/assets/2b6924fb-d0a8-4523-b0af-fcea37da48bb)
+This is the current state of the game. I am now able to open the shop and purchase some binoculars or cypher kit. Now you can use the items but right now, they don't effect the game.
