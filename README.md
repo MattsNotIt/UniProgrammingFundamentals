@@ -96,4 +96,5 @@ This code works because the ASCII character encoding for uppercase letters range
 Now I have gotten this to work, I am continuing with different parts of the program. Right now, I would like to get the inventory and shop to actually work. This involves me adding many different functions including the inventory system, use item, money management, etc. This means that it is much easier for me to add items and modify them.
 
 ![image (10)](https://github.com/user-attachments/assets/2b6924fb-d0a8-4523-b0af-fcea37da48bb)
+
 This is the current state of the game. I am now able to open the shop and purchase some binoculars or cypher kit. Now you can use the items but right now, they don't effect the game.
