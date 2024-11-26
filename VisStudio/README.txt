@@ -1,0 +1,1 @@
+This includes all of the projects in one solution file from the "template" thing we were given. Just have to unload and reload each project to run each individual one.

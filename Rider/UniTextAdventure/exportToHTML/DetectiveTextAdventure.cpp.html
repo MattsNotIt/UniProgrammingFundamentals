@@ -1,0 +1,472 @@
+<html>
+<head>
+<title>DetectiveTextAdventure.cpp</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #ff6188;}
+.s1 { color: #fcfcfa;}
+.s2 { color: #ffd866;}
+.s3 { color: #939293;}
+.s4 { color: #727072; font-style: italic;}
+.s5 { color: #ab9df2;}
+.s6 { color: #78dce8;}
+</style>
+</head>
+<body bgcolor="#2d2a2e">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+DetectiveTextAdventure.cpp</font>
+</center></td></tr></table>
+<pre><span class="s0">#include </span><span class="s2">&lt;algorithm&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;iostream&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;vector&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;map&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;cstdlib&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;ctime&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;string&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;chrono&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;thread&gt;</span>
+
+<span class="s0">using namespace </span><span class="s1">std</span><span class="s3">;</span>
+
+<span class="s4">// Create Functions</span>
+<span class="s0">void </span><span class="s1">DisplayMenu</span><span class="s3">();</span>
+<span class="s0">void </span><span class="s1">VisitLocation</span><span class="s3">(</span><span class="s1">string location</span><span class="s3">);</span>
+<span class="s0">void </span><span class="s1">OpenShop</span><span class="s3">();</span>
+<span class="s0">void </span><span class="s1">InitializeLocations</span><span class="s3">();</span>
+<span class="s0">int </span><span class="s1">InitializeCodes</span><span class="s3">();</span>
+<span class="s0">void </span><span class="s1">ListControls</span><span class="s3">();</span>
+<span class="s0">void </span><span class="s1">DisplayLocations</span><span class="s3">();</span>
+<span class="s0">void </span><span class="s1">LookAround</span><span class="s3">();</span>
+<span class="s0">void </span><span class="s1">InterrogateStranger</span><span class="s3">();</span>
+<span class="s0">void </span><span class="s1">HandleCommand</span><span class="s3">(</span><span class="s1">string command</span><span class="s3">);</span>
+<span class="s0">void </span><span class="s1">ShowInventory</span><span class="s3">();</span>
+<span class="s0">void </span><span class="s1">UseItem</span><span class="s3">(</span><span class="s1">string itemName</span><span class="s3">);</span>
+
+<span class="s4">//Functions to display random events</span>
+<span class="s1">string GetUsefulPhrase</span><span class="s3">();</span>
+<span class="s1">string GetUselessPhrase</span><span class="s3">();</span>
+<span class="s1">string PositiveRandomLookEvent</span><span class="s3">();</span>
+<span class="s1">string NeutralRandomLookEvent</span><span class="s3">();</span>
+<span class="s1">string NegativeRandomLookEvent</span><span class="s3">();</span>
+
+<span class="s0">struct </span><span class="s1">ShopItem</span>
+<span class="s3">{</span>
+    <span class="s1">string Description</span><span class="s3">;</span>
+    <span class="s0">int </span><span class="s1">Price</span><span class="s3">;</span>
+<span class="s3">};</span>
+
+<span class="s4">// Useful Variables</span>
+<span class="s1">vector</span><span class="s0">&lt;</span><span class="s1">string</span><span class="s0">&gt; </span><span class="s1">Locations</span><span class="s3">;</span>
+<span class="s1">map</span><span class="s0">&lt;</span><span class="s1">string</span><span class="s3">, </span><span class="s1">ShopItem</span><span class="s0">&gt; </span><span class="s1">ShopItems </span><span class="s0">= </span>
+<span class="s3">{</span>
+    <span class="s3">{</span><span class="s2">&quot;Cypher Kit&quot;</span><span class="s3">, {</span><span class="s2">&quot;A kit to help you decrypt codes easier.&quot;</span><span class="s3">, </span><span class="s5">25</span><span class="s3">}},</span>
+    <span class="s3">{</span><span class="s2">&quot;Binoculars&quot;</span><span class="s3">, {</span><span class="s2">&quot;Useful for spying on suspects from afar.&quot;</span><span class="s3">, </span><span class="s5">25</span><span class="s3">}}</span>
+<span class="s3">};</span>
+<span class="s1">map</span><span class="s0">&lt;</span><span class="s1">string</span><span class="s3">, </span><span class="s1">string</span><span class="s0">&gt; </span><span class="s1">PlayerInventory</span><span class="s3">;</span>
+<span class="s0">int </span><span class="s1">PlayerMoney </span><span class="s0">= </span><span class="s5">100</span><span class="s3">; </span><span class="s4">// Starting money for the player</span>
+<span class="s0">double </span><span class="s1">InterrogationClueChance </span><span class="s0">= </span><span class="s5">50.0</span><span class="s3">;</span>
+
+<span class="s0">int </span><span class="s1">RandomCode1</span><span class="s3">{};</span>
+<span class="s0">int </span><span class="s1">RandomCode2</span><span class="s3">{};</span>
+<span class="s0">int </span><span class="s1">RandomCode3</span><span class="s3">{};</span>
+
+<span class="s0">int </span><span class="s1">main</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">srand</span><span class="s3">(</span><span class="s1">time</span><span class="s3">(</span><span class="s5">0</span><span class="s3">)); </span><span class="s4">// Create a seed for the game</span>
+
+    <span class="s4">// Initializations</span>
+    <span class="s1">InitializeLocations</span><span class="s3">();</span>
+    <span class="s1">InitializeCodes</span><span class="s3">();</span>
+    
+    <span class="s1">string command</span><span class="s3">{};</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;Welcome back, Detective. We have received a new case in your absence.</span><span class="s6">\n\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s1">DisplayMenu</span><span class="s3">();</span>
+
+    <span class="s4">// The main game loop</span>
+    <span class="s0">while </span><span class="s3">(</span><span class="s0">true</span><span class="s3">)</span>
+    <span class="s3">{</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&gt; &quot;</span><span class="s3">;</span>
+        <span class="s1">getline</span><span class="s3">(</span><span class="s1">cin</span><span class="s3">, </span><span class="s1">command</span><span class="s3">);</span>
+
+        <span class="s1">HandleCommand</span><span class="s3">(</span><span class="s1">command</span><span class="s3">);</span>
+    <span class="s3">}</span>
+
+    <span class="s0">return </span><span class="s5">0</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s4">// Function to handle player commands</span>
+<span class="s0">void </span><span class="s1">HandleCommand</span><span class="s3">(</span><span class="s1">string command</span><span class="s3">)</span>
+<span class="s3">{</span>
+    <span class="s4">// Convert string to lowercase</span>
+    <span class="s0">for </span><span class="s3">(</span><span class="s0">char &amp;</span><span class="s1">c : command</span><span class="s3">) {</span>
+        <span class="s0">if </span><span class="s3">(</span><span class="s1">c </span><span class="s0">&gt;= </span><span class="s2">'A' </span><span class="s0">&amp;&amp; </span><span class="s1">c </span><span class="s0">&lt;= </span><span class="s2">'Z'</span><span class="s3">) {</span>
+            <span class="s1">c </span><span class="s0">+= </span><span class="s5">32</span><span class="s3">;</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s0">if </span><span class="s3">(</span><span class="s1">command </span><span class="s0">== </span><span class="s2">&quot;shop&quot; </span><span class="s0">|| </span><span class="s1">command </span><span class="s0">== </span><span class="s2">&quot;store&quot;</span><span class="s3">) {</span>
+        <span class="s1">OpenShop</span><span class="s3">();</span>
+    <span class="s3">} </span>
+    <span class="s0">else if </span><span class="s3">(</span><span class="s1">find</span><span class="s3">(</span><span class="s1">Locations</span><span class="s3">.</span><span class="s1">begin</span><span class="s3">(), </span><span class="s1">Locations</span><span class="s3">.</span><span class="s0">end</span><span class="s3">(), </span><span class="s1">command</span><span class="s3">) </span><span class="s0">!= </span><span class="s1">Locations</span><span class="s3">.</span><span class="s0">end</span><span class="s3">()) {</span>
+        <span class="s1">VisitLocation</span><span class="s3">(</span><span class="s1">command</span><span class="s3">);</span>
+    <span class="s3">} </span>
+    <span class="s0">else if </span><span class="s3">(</span><span class="s1">command </span><span class="s0">== </span><span class="s2">&quot;look around&quot;</span><span class="s3">) {</span>
+        <span class="s1">LookAround</span><span class="s3">();</span>
+    <span class="s3">} </span>
+    <span class="s0">else if </span><span class="s3">(</span><span class="s1">command </span><span class="s0">== </span><span class="s2">&quot;interrogate stranger&quot;</span><span class="s3">) {</span>
+        <span class="s1">InterrogateStranger</span><span class="s3">();</span>
+    <span class="s3">} </span>
+    <span class="s0">else if </span><span class="s3">(</span><span class="s1">command </span><span class="s0">== </span><span class="s2">&quot;quit&quot;</span><span class="s3">) {</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;Goodbye, Detective.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+        <span class="s0">return</span><span class="s3">; </span><span class="s4">// Indicate to exit the game loop</span>
+    <span class="s3">} </span>
+    <span class="s0">else if </span><span class="s3">(</span><span class="s1">command </span><span class="s0">== </span><span class="s2">&quot;help&quot;</span><span class="s3">) {</span>
+        <span class="s1">ListControls</span><span class="s3">();</span>
+    <span class="s3">} </span>
+    <span class="s0">else if </span><span class="s3">(</span><span class="s1">command </span><span class="s0">== </span><span class="s2">&quot;list locations&quot;</span><span class="s3">) {</span>
+        <span class="s1">DisplayLocations</span><span class="s3">();</span>
+    <span class="s3">} </span>
+    <span class="s0">else if </span><span class="s3">(</span><span class="s1">command </span><span class="s0">== </span><span class="s2">&quot;show inventory&quot;</span><span class="s3">) {</span>
+        <span class="s1">ShowInventory</span><span class="s3">();</span>
+    <span class="s3">}</span>
+    <span class="s0">else if </span><span class="s3">(</span><span class="s1">command</span><span class="s3">.</span><span class="s1">find</span><span class="s3">(</span><span class="s2">&quot;use &quot;</span><span class="s3">) </span><span class="s0">== </span><span class="s5">0</span><span class="s3">) {</span>
+        <span class="s1">UseItem</span><span class="s3">(</span><span class="s1">command</span><span class="s3">.</span><span class="s1">substr</span><span class="s3">(</span><span class="s5">4</span><span class="s3">)); </span><span class="s4">// Extract the item name after &quot;use &quot;</span>
+    <span class="s3">}</span>
+    <span class="s0">else </span><span class="s3">{</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;Unknown command. Try again.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s0">return</span><span class="s3">; </span><span class="s4">// Continue the game loop</span>
+<span class="s3">}</span>
+
+<span class="s0">void </span><span class="s1">DisplayMenu</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;Commands: type the name of a location to visit, 'shop' to open the store, or 'quit' to exit. Type 'help' for help</span><span class="s6">\n\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;We have narrowed the relevant locations to these spots here: &quot;</span><span class="s3">;</span>
+    <span class="s0">for </span><span class="s3">(</span><span class="s0">const auto&amp; </span><span class="s1">Location : Locations</span><span class="s3">)</span>
+    <span class="s3">{</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s1">Location </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;, &quot;</span><span class="s3">;</span>
+    <span class="s3">}</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\b\b \n</span><span class="s2">&quot;</span><span class="s3">; </span><span class="s4">// Remove the last comma and space</span>
+<span class="s3">}</span>
+
+<span class="s0">void </span><span class="s1">DisplayLocations</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s0">for </span><span class="s3">(</span><span class="s0">const auto&amp; </span><span class="s1">Location : Locations</span><span class="s3">)</span>
+    <span class="s3">{</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s1">Location </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;, &quot;</span><span class="s3">;</span>
+    <span class="s3">}</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\b\b \n</span><span class="s2">&quot;</span><span class="s3">; </span><span class="s4">// Same as DisplayMenu but less jargon</span>
+<span class="s3">}</span>
+
+<span class="s0">void </span><span class="s1">ListControls</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;~~~Usable Commands~~~</span><span class="s6">\n</span><span class="s2">&quot; </span><span class="s0">&lt;&lt; </span><span class="s1">endl</span><span class="s3">;</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;   Look around</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;   Interrogate Stranger</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;   Shop or Store</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;   [Location]</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;   Show Inventory</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;   Use [itemname]</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;   Quit</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s0">void </span><span class="s1">VisitLocation</span><span class="s3">(</span><span class="s1">string location</span><span class="s3">)</span>
+<span class="s3">{</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You arrive at the &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">location </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    
+    <span class="s4">// Decide on a random event type: positive, neutral, or negative</span>
+    <span class="s0">int </span><span class="s1">eventType </span><span class="s0">= </span><span class="s1">rand</span><span class="s3">() </span><span class="s0">% </span><span class="s5">3</span><span class="s3">;</span>
+    <span class="s1">string eventMessage</span><span class="s3">;</span>
+    
+    <span class="s0">switch </span><span class="s3">(</span><span class="s1">eventType</span><span class="s3">)</span>
+    <span class="s3">{</span>
+        <span class="s0">case </span><span class="s5">0</span><span class="s1">:  </span><span class="s4">// Positive Event</span>
+            <span class="s1">eventMessage </span><span class="s0">= </span><span class="s1">PositiveRandomLookEvent</span><span class="s3">();</span>
+            <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s1">eventMessage</span><span class="s3">;</span>
+            
+            <span class="s0">if </span><span class="s3">(</span><span class="s1">eventMessage</span><span class="s3">.</span><span class="s1">find</span><span class="s3">(</span><span class="s2">&quot;extra money&quot;</span><span class="s3">) </span><span class="s0">!= </span><span class="s1">string::npos</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s0">int </span><span class="s1">moneyFound </span><span class="s0">= </span><span class="s1">rand</span><span class="s3">() </span><span class="s0">% </span><span class="s5">20 </span><span class="s0">+ </span><span class="s5">10</span><span class="s3">; </span><span class="s4">// Random amount between 10 and 30</span>
+                <span class="s1">PlayerMoney </span><span class="s0">+= </span><span class="s1">moneyFound</span><span class="s3">;</span>
+                <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You found &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">moneyFound </span><span class="s0">&lt;&lt; </span><span class="s2">&quot; coins! Your new balance: &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">PlayerMoney </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+            <span class="s3">}</span>
+            <span class="s0">else if </span><span class="s3">(</span><span class="s1">eventMessage</span><span class="s3">.</span><span class="s1">find</span><span class="s3">(</span><span class="s2">&quot;reward&quot;</span><span class="s3">) </span><span class="s0">!= </span><span class="s1">string::npos</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s0">int </span><span class="s1">reward </span><span class="s0">= </span><span class="s1">rand</span><span class="s3">() </span><span class="s0">% </span><span class="s5">50 </span><span class="s0">+ </span><span class="s5">25</span><span class="s3">; </span><span class="s4">// Random reward between 25 and 75</span>
+                <span class="s1">PlayerMoney </span><span class="s0">+= </span><span class="s1">reward</span><span class="s3">;</span>
+                <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You received a reward of &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">reward </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;! Your new balance: &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">PlayerMoney </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+            <span class="s3">}</span>
+            <span class="s0">break</span><span class="s3">;</span>
+            
+        <span class="s0">case </span><span class="s5">1</span><span class="s1">:  </span><span class="s4">// Neutral Event</span>
+            <span class="s1">eventMessage </span><span class="s0">= </span><span class="s1">NeutralRandomLookEvent</span><span class="s3">();</span>
+            <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s1">eventMessage</span><span class="s3">;</span>
+            <span class="s4">// No effect on player stats or inventory for neutral events</span>
+            <span class="s0">break</span><span class="s3">;</span>
+            
+        <span class="s0">case </span><span class="s5">2</span><span class="s1">:  </span><span class="s4">// Negative Event</span>
+            <span class="s1">eventMessage </span><span class="s0">= </span><span class="s1">NegativeRandomLookEvent</span><span class="s3">();</span>
+            <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s1">eventMessage</span><span class="s3">;</span>
+            
+            <span class="s0">if </span><span class="s3">(</span><span class="s1">eventMessage</span><span class="s3">.</span><span class="s1">find</span><span class="s3">(</span><span class="s2">&quot;picked pocketed&quot;</span><span class="s3">) </span><span class="s0">!= </span><span class="s1">string::npos</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s0">int </span><span class="s1">moneyLost </span><span class="s0">= </span><span class="s1">rand</span><span class="s3">() </span><span class="s0">% </span><span class="s5">15 </span><span class="s0">+ </span><span class="s5">5</span><span class="s3">; </span><span class="s4">// Random amount between 5 and 20</span>
+                <span class="s0">if </span><span class="s3">(</span><span class="s1">PlayerMoney </span><span class="s0">&gt;= </span><span class="s1">moneyLost</span><span class="s3">)</span>
+                <span class="s3">{</span>
+                    <span class="s1">PlayerMoney </span><span class="s0">-= </span><span class="s1">moneyLost</span><span class="s3">;</span>
+                    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You lost &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">moneyLost </span><span class="s0">&lt;&lt; </span><span class="s2">&quot; coins. Your new balance: &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">PlayerMoney </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+                <span class="s3">}</span>
+                <span class="s0">else</span>
+                <span class="s3">{</span>
+                    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;Luckily, you didn’t have any money to lose.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+                <span class="s3">}</span>
+            <span class="s3">}</span>
+            <span class="s0">else if </span><span class="s3">(</span><span class="s1">eventMessage</span><span class="s3">.</span><span class="s1">find</span><span class="s3">(</span><span class="s2">&quot;forgot to bring something&quot;</span><span class="s3">) </span><span class="s0">!= </span><span class="s1">string::npos</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s4">// Add additional effect if needed, such as modifying player status</span>
+            <span class="s3">}</span>
+            <span class="s0">break</span><span class="s3">;</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s1">string GetUsefulPhrase</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">vector</span><span class="s0">&lt;</span><span class="s1">string</span><span class="s0">&gt; </span><span class="s1">InterrogatedPhrases </span><span class="s0">=</span>
+    <span class="s3">{</span>
+        <span class="s2">&quot;The suspect seemed nervous.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;You notice a slight hesitation in their voice.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;Their tone suggests they are hiding something.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;They mention a shadowy figure they saw earlier.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;You catch a clue from an offhand remark.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;The stranger talks about a strange noise they heard.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;A bead of sweat forms on their forehead.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;They stammer while recalling the events of last night.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;The person gives a description of an unknown individual.&quot;</span>
+    <span class="s3">};</span>
+    
+    <span class="s4">// Return a random phrase</span>
+    <span class="s0">return </span><span class="s1">InterrogatedPhrases</span><span class="s3">[</span><span class="s1">rand</span><span class="s3">() </span><span class="s0">% </span><span class="s1">InterrogatedPhrases</span><span class="s3">.</span><span class="s1">size</span><span class="s3">()];</span>
+<span class="s3">}</span>
+
+<span class="s1">string GetUselessPhrase</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">vector</span><span class="s0">&lt;</span><span class="s1">string</span><span class="s0">&gt; </span><span class="s1">InterrogatedPhrases </span><span class="s0">=</span>
+    <span class="s3">{</span>
+        <span class="s2">&quot;The stranger shrugs you off and walks away.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;The stranger said they have no idea.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;The stranger doesn't speak your language&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;You mess up your wording&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;The stranger glances around, avoiding eye contact.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;They turned the corner before you spoke&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;You decided that this person wont be of help&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;They whisper something barely audible.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;They offer an alibi that doesn't quite add up.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;The person looks confused and denies everything.&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;The individual gives you an irrelevant but curious fact.&quot;</span><span class="s3">,</span>
+    <span class="s3">};</span>
+    
+    <span class="s4">// Return a random phrase</span>
+    <span class="s0">return </span><span class="s1">InterrogatedPhrases</span><span class="s3">[</span><span class="s1">rand</span><span class="s3">() </span><span class="s0">% </span><span class="s1">InterrogatedPhrases</span><span class="s3">.</span><span class="s1">size</span><span class="s3">()];</span>
+<span class="s3">}</span>
+
+<span class="s4">// Double fix for the case sensitive command stuff</span>
+<span class="s0">bool </span><span class="s1">CaseInsensitiveCompare</span><span class="s3">(</span><span class="s0">const </span><span class="s1">string</span><span class="s0">&amp; </span><span class="s1">str1</span><span class="s3">, </span><span class="s0">const </span><span class="s1">string</span><span class="s0">&amp; </span><span class="s1">str2</span><span class="s3">)</span>
+<span class="s3">{</span>
+    <span class="s0">if </span><span class="s3">(</span><span class="s1">str1</span><span class="s3">.</span><span class="s1">size</span><span class="s3">() </span><span class="s0">!= </span><span class="s1">str2</span><span class="s3">.</span><span class="s1">size</span><span class="s3">()) </span><span class="s0">return false</span><span class="s3">;</span>
+    <span class="s0">for </span><span class="s3">(</span><span class="s1">size_t i </span><span class="s0">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s0">&lt; </span><span class="s1">str1</span><span class="s3">.</span><span class="s1">size</span><span class="s3">(); </span><span class="s0">++</span><span class="s1">i</span><span class="s3">) {</span>
+        <span class="s0">if </span><span class="s3">(</span><span class="s1">tolower</span><span class="s3">(</span><span class="s1">str1</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]) </span><span class="s0">!= </span><span class="s1">tolower</span><span class="s3">(</span><span class="s1">str2</span><span class="s3">[</span><span class="s1">i</span><span class="s3">])) </span><span class="s0">return false</span><span class="s3">;</span>
+    <span class="s3">}</span>
+    <span class="s0">return true</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s0">void </span><span class="s1">OpenShop</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;Welcome to the shop! Here are the available items:</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s0">for </span><span class="s3">(</span><span class="s0">const auto&amp; </span><span class="s1">item : ShopItems</span><span class="s3">)</span>
+    <span class="s3">{</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;- &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">item</span><span class="s3">.</span><span class="s1">first </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;: &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">item</span><span class="s3">.</span><span class="s1">second</span><span class="s3">.</span><span class="s1">Description </span><span class="s0">&lt;&lt; </span><span class="s2">&quot; (Price: &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">item</span><span class="s3">.</span><span class="s1">second</span><span class="s3">.</span><span class="s1">Price </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;)</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s1">string purchase</span><span class="s3">;</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;Enter the name of the item you wish to buy or type 'exit' to leave the shop:</span><span class="s6">\n</span><span class="s2">&gt; &quot;</span><span class="s3">;</span>
+    <span class="s1">getline</span><span class="s3">(</span><span class="s1">cin</span><span class="s3">, </span><span class="s1">purchase</span><span class="s3">);</span>
+
+    <span class="s0">bool </span><span class="s1">itemFound </span><span class="s0">= false</span><span class="s3">;</span>
+    <span class="s0">for </span><span class="s3">(</span><span class="s0">const auto&amp; </span><span class="s1">item : ShopItems</span><span class="s3">)</span>
+    <span class="s3">{</span>
+        <span class="s0">if </span><span class="s3">(</span><span class="s1">CaseInsensitiveCompare</span><span class="s3">(</span><span class="s1">purchase</span><span class="s3">, </span><span class="s1">item</span><span class="s3">.</span><span class="s1">first</span><span class="s3">))</span>
+        <span class="s3">{</span>
+            <span class="s0">if </span><span class="s3">(</span><span class="s1">PlayerMoney </span><span class="s0">&gt;= </span><span class="s1">item</span><span class="s3">.</span><span class="s1">second</span><span class="s3">.</span><span class="s1">Price</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s1">PlayerInventory</span><span class="s3">[</span><span class="s1">item</span><span class="s3">.</span><span class="s1">first</span><span class="s3">] </span><span class="s0">= </span><span class="s1">item</span><span class="s3">.</span><span class="s1">second</span><span class="s3">.</span><span class="s1">Description</span><span class="s3">;</span>
+                <span class="s1">PlayerMoney </span><span class="s0">-= </span><span class="s1">item</span><span class="s3">.</span><span class="s1">second</span><span class="s3">.</span><span class="s1">Price</span><span class="s3">;</span>
+                <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You have purchased: &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">item</span><span class="s3">.</span><span class="s1">first </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;. Remaining Money: &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">PlayerMoney </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+            <span class="s3">}</span>
+            <span class="s0">else</span>
+            <span class="s3">{</span>
+                <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You don't have enough money to buy &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">item</span><span class="s3">.</span><span class="s1">first </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+            <span class="s3">}</span>
+            <span class="s1">itemFound </span><span class="s0">= true</span><span class="s3">;</span>
+            <span class="s0">break</span><span class="s3">;</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s0">if </span><span class="s3">(</span><span class="s0">!</span><span class="s1">itemFound </span><span class="s0">&amp;&amp; </span><span class="s1">purchase </span><span class="s0">!= </span><span class="s2">&quot;exit&quot;</span><span class="s3">)</span>
+    <span class="s3">{</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;Invalid item. Try again or type 'exit' to leave.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s0">void </span><span class="s1">ShowInventory</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;Your Inventory:</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s1">this_thread::sleep_for</span><span class="s3">(</span><span class="s1">std::chrono::milliseconds</span><span class="s3">(</span><span class="s5">1000</span><span class="s3">));</span>
+    <span class="s0">if </span><span class="s3">(</span><span class="s1">PlayerInventory</span><span class="s3">.</span><span class="s1">empty</span><span class="s3">() </span><span class="s0">&amp; </span><span class="s1">PlayerMoney </span><span class="s0">&gt; </span><span class="s5">0</span><span class="s3">())</span>
+    <span class="s3">{</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You have no items except for &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">PlayerMoney </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;.&quot;</span><span class="s3">;</span>
+    <span class="s3">}</span>
+    <span class="s0">else if </span><span class="s3">(</span><span class="s1">PlayerInventory</span><span class="s3">.</span><span class="s1">empty</span><span class="s3">() </span><span class="s0">&amp;&amp; </span><span class="s1">PlayerMoney </span><span class="s0">&lt; </span><span class="s5">1</span><span class="s3">)</span>
+    <span class="s3">{</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You have no items.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s3">}</span>
+    <span class="s0">else if </span><span class="s3">(</span><span class="s1">PlayerInventory</span><span class="s3">.</span><span class="s1">size</span><span class="s3">() </span><span class="s0">&gt; </span><span class="s5">0</span><span class="s3">)</span>
+    <span class="s3">{</span>
+        <span class="s0">for </span><span class="s3">(</span><span class="s0">const auto&amp; </span><span class="s1">item : PlayerInventory</span><span class="s3">)</span>
+        <span class="s3">{</span>
+            <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You have, &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">PlayerMoney </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+            <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;- &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">item</span><span class="s3">.</span><span class="s1">first </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;: &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">item</span><span class="s3">.</span><span class="s1">second </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s0">void </span><span class="s1">UseItem</span><span class="s3">(</span><span class="s1">string itemName</span><span class="s3">)</span>
+<span class="s3">{</span>
+    <span class="s0">bool </span><span class="s1">itemFound </span><span class="s0">= false</span><span class="s3">;</span>
+    <span class="s0">for </span><span class="s3">(</span><span class="s0">const auto&amp; </span><span class="s1">item : PlayerInventory</span><span class="s3">)</span>
+    <span class="s3">{</span>
+        <span class="s0">if </span><span class="s3">(</span><span class="s1">CaseInsensitiveCompare</span><span class="s3">(</span><span class="s1">itemName</span><span class="s3">, </span><span class="s1">item</span><span class="s3">.</span><span class="s1">first</span><span class="s3">))</span>
+        <span class="s3">{</span>
+            <span class="s1">this_thread::sleep_for</span><span class="s3">(</span><span class="s1">std::chrono::milliseconds</span><span class="s3">(</span><span class="s5">1000</span><span class="s3">));</span>
+            <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You use the &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">item</span><span class="s3">.</span><span class="s1">first </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+            <span class="s4">// Add logic for what happens when the item is used</span>
+            <span class="s1">PlayerInventory</span><span class="s3">.</span><span class="s1">erase</span><span class="s3">(</span><span class="s1">item</span><span class="s3">.</span><span class="s1">first</span><span class="s3">); </span><span class="s4">// Remove the item after use</span>
+            <span class="s1">itemFound </span><span class="s0">= true</span><span class="s3">;</span>
+            <span class="s0">break</span><span class="s3">;</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+    <span class="s0">if </span><span class="s3">(</span><span class="s0">!</span><span class="s1">itemFound</span><span class="s3">) {</span>
+        <span class="s1">this_thread::sleep_for</span><span class="s3">(</span><span class="s1">std::chrono::milliseconds</span><span class="s3">(</span><span class="s5">1000</span><span class="s3">));</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You don't have &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">itemName </span><span class="s0">&lt;&lt; </span><span class="s2">&quot; in your inventory.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s1">string PositiveRandomLookEvent</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">vector</span><span class="s0">&lt;</span><span class="s1">string</span><span class="s0">&gt; </span><span class="s1">PositiveRandomisedLookEvent </span><span class="s0">=</span>
+    <span class="s3">{</span>
+        <span class="s2">&quot;You found extra money laying on the ground on the way.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;Somebody recognised you as the person who found the criminal terrorising the town last year and gave you a reward as thanks</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;You stopped a thief and rescued the old lady's purse. She gave you a reward for your help.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">,</span>
+    <span class="s3">};</span>
+    
+    <span class="s4">// Return a random phrase</span>
+    <span class="s0">return </span><span class="s1">PositiveRandomisedLookEvent</span><span class="s3">[</span><span class="s1">rand</span><span class="s3">() </span><span class="s0">% </span><span class="s1">PositiveRandomisedLookEvent</span><span class="s3">.</span><span class="s1">size</span><span class="s3">()];</span>
+<span class="s3">}</span>
+
+<span class="s1">string NeutralRandomLookEvent</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">vector</span><span class="s0">&lt;</span><span class="s1">string</span><span class="s0">&gt; </span><span class="s1">NeutralRandomisedLookEvent </span><span class="s0">=</span>
+    <span class="s3">{</span>
+        <span class="s2">&quot;You managed to reach your destination.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;You had a nice chat with somebody waiting at the bus stop.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;You watched everybody walking around town while walking to your destination.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">,</span>
+    <span class="s3">};</span>
+    
+    <span class="s4">// Return a random phrase</span>
+    <span class="s0">return </span><span class="s1">NeutralRandomisedLookEvent</span><span class="s3">[</span><span class="s1">rand</span><span class="s3">() </span><span class="s0">% </span><span class="s1">NeutralRandomisedLookEvent</span><span class="s3">.</span><span class="s1">size</span><span class="s3">()];</span>
+<span class="s3">}</span>
+
+<span class="s1">string NegativeRandomLookEvent</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">vector</span><span class="s0">&lt;</span><span class="s1">string</span><span class="s0">&gt; </span><span class="s1">NegativeRandomisedLookEvent </span><span class="s0">=</span>
+    <span class="s3">{</span>
+        <span class="s2">&quot;You forgot to bring something with you.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;You were picked pocketed without realising on the way.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">,</span>
+        <span class="s2">&quot;You went the wrong way and ended up at a new location.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">,</span>
+    <span class="s3">};</span>
+    
+    <span class="s4">// Return a random phrase</span>
+    <span class="s0">return </span><span class="s1">NegativeRandomisedLookEvent</span><span class="s3">[</span><span class="s1">rand</span><span class="s3">() </span><span class="s0">% </span><span class="s1">NegativeRandomisedLookEvent</span><span class="s3">.</span><span class="s1">size</span><span class="s3">()];</span>
+<span class="s3">}</span>
+
+<span class="s0">void </span><span class="s1">LookAround</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You carefully look around your surroundings, observing every detail for clues.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    
+    <span class="s0">bool </span><span class="s1">foundSomething </span><span class="s0">= </span><span class="s1">rand</span><span class="s3">() </span><span class="s0">% </span><span class="s5">2</span><span class="s3">;</span>
+    
+    <span class="s0">if </span><span class="s3">(</span><span class="s1">foundSomething</span><span class="s3">)</span>
+    <span class="s3">{</span>
+        <span class="s1">this_thread::sleep_for</span><span class="s3">(</span><span class="s1">std::chrono::milliseconds</span><span class="s3">(</span><span class="s5">1500</span><span class="s3">));</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You spot something interesting nearby.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s1">PositiveRandomLookEvent</span><span class="s3">(); </span><span class="s4">// Adds a random positive event</span>
+    <span class="s3">}</span>
+    <span class="s0">else</span>
+    <span class="s3">{</span>
+        <span class="s1">this_thread::sleep_for</span><span class="s3">(</span><span class="s1">std::chrono::milliseconds</span><span class="s3">(</span><span class="s5">1500</span><span class="s3">));</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You don’t notice anything unusual here.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s0">void </span><span class="s1">InterrogateStranger</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;You approach a nearby stranger and start to question them about recent events.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+
+    <span class="s4">// Generate a random double between 0 and 1</span>
+    <span class="s0">double </span><span class="s1">RandomValue </span><span class="s0">= static_cast&lt;double&gt;</span><span class="s3">(</span><span class="s1">rand</span><span class="s3">()) </span><span class="s0">/ </span><span class="s1">RAND_MAX</span><span class="s3">;</span>
+
+    <span class="s4">// Generate a random boolean value</span>
+    <span class="s0">bool </span><span class="s1">IsUsefulPhrase </span><span class="s0">= </span><span class="s1">rand</span><span class="s3">() </span><span class="s0">% </span><span class="s5">2</span><span class="s3">;</span>
+    
+    <span class="s4">// Use the correct variable name and logic</span>
+    <span class="s0">if </span><span class="s3">(</span><span class="s1">RandomValue </span><span class="s0">&lt; </span><span class="s1">InterrogationClueChance </span><span class="s0">/ </span><span class="s5">100.0</span><span class="s3">)  </span><span class="s4">// Convert percentage to probability</span>
+    <span class="s3">{</span>
+        <span class="s0">if </span><span class="s3">(</span><span class="s1">IsUsefulPhrase</span><span class="s3">)</span>
+        <span class="s3">{</span>
+            <span class="s1">this_thread::sleep_for</span><span class="s3">(</span><span class="s1">std::chrono::milliseconds</span><span class="s3">(</span><span class="s5">1500</span><span class="s3">));</span>
+            <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s1">GetUsefulPhrase</span><span class="s3">() </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+            <span class="s1">InterrogationClueChance </span><span class="s0">/= </span><span class="s5">1.75</span><span class="s3">; </span><span class="s4">// Reduce the chance for the next interrogation</span>
+        <span class="s3">}</span>
+        <span class="s0">else</span>
+        <span class="s3">{</span>
+            <span class="s1">this_thread::sleep_for</span><span class="s3">(</span><span class="s1">std::chrono::milliseconds</span><span class="s3">(</span><span class="s5">1500</span><span class="s3">));</span>
+            <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s1">GetUselessPhrase</span><span class="s3">() </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+            <span class="s1">InterrogationClueChance </span><span class="s0">/= </span><span class="s5">1.25</span><span class="s3">; </span><span class="s4">// Reduce the chance for the next interrogation</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+    <span class="s0">else</span>
+    <span class="s3">{</span>
+        <span class="s1">this_thread::sleep_for</span><span class="s3">(</span><span class="s1">std::chrono::milliseconds</span><span class="s3">(</span><span class="s5">1500</span><span class="s3">));</span>
+        <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;The stranger doesn't have any useful information.</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s4">// Output the current interrogation clue chance for debugging</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;Interrogation clue chance: &quot; </span><span class="s0">&lt;&lt; </span><span class="s1">InterrogationClueChance </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;%</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+
+<span class="s0">void </span><span class="s1">InitializeLocations</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">Locations </span><span class="s0">= </span><span class="s3">{</span><span class="s2">&quot;kitchen&quot;</span><span class="s3">, </span><span class="s2">&quot;store&quot;</span><span class="s3">, </span><span class="s2">&quot;restaurant&quot;</span><span class="s3">, </span><span class="s2">&quot;park&quot;</span><span class="s3">, </span><span class="s2">&quot;mansion&quot;</span><span class="s3">, </span><span class="s2">&quot;school&quot;</span><span class="s3">, </span><span class="s2">&quot;arcade&quot;</span><span class="s3">};</span>
+<span class="s3">}</span>
+
+<span class="s0">int </span><span class="s1">InitializeCodes</span><span class="s3">()</span>
+<span class="s3">{</span>
+    <span class="s1">cout </span><span class="s0">&lt;&lt; </span><span class="s1">RandomCode1 </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&quot; </span><span class="s0">&lt;&lt; </span><span class="s1">RandomCode2 </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&quot; </span><span class="s0">&lt;&lt; </span><span class="s1">RandomCode3 </span><span class="s0">&lt;&lt; </span><span class="s2">&quot;</span><span class="s6">\n</span><span class="s2">&quot;</span><span class="s3">;</span>
+    <span class="s0">return </span><span class="s1">RandomCode1</span><span class="s3">;</span>
+<span class="s3">}</span></pre>
+</body>
+</html>

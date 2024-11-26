@@ -1,0 +1,6 @@
+﻿  DetectiveTextAdventure.cpp
+F:\UniWork\UniProgrammingFundamentals\Rider\UniTextAdventure\DetectiveTextAdventure\DetectiveTextAdventure.cpp(83,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+F:\UniWork\UniProgrammingFundamentals\Rider\UniTextAdventure\DetectiveTextAdventure\DetectiveTextAdventure.cpp(395,49): warning C4353: nonstandard extension used: constant 0 as function expression.  Use '__noop' function intrinsic instead
+F:\UniWork\UniProgrammingFundamentals\Rider\UniTextAdventure\DetectiveTextAdventure\DetectiveTextAdventure.cpp(395,52): warning C4554: '&': check operator precedence for possible error; use parentheses to clarify precedence
+F:\UniWork\UniProgrammingFundamentals\Rider\UniTextAdventure\DetectiveTextAdventure\DetectiveTextAdventure.cpp(452,27): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  DetectiveTextAdventure.vcxproj -> F:\UniWork\UniProgrammingFundamentals\Rider\UniTextAdventure\x64\Debug\DetectiveTextAdventure.exe

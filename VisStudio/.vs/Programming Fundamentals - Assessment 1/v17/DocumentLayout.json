@@ -1,10 +1,10 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "F:\\UniWork\\Github\\VisStudio\\",
+  "WorkspaceRootPath": "F:\\UniWork\\UniProgrammingFundamentals\\VisStudio\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F3CF4A5C-6B5B-3F33-B0D4-A575AD335B96}|task-4\\task4.vcxproj|F:\\UniWork\\Github\\VisStudio\\task-4\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F3CF4A5C-6B5B-3F33-B0D4-A575AD335B96}|task-4\\task4.vcxproj|solutionrelative:task-4\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{91019530-BCD8-3996-AB0F-F29DAF8EFB9A}|task-6\\Task6.vcxproj|F:\\UniWork\\UniProgrammingFundamentals\\VisStudio\\task-6\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{91019530-BCD8-3996-AB0F-F29DAF8EFB9A}|task-6\\Task6.vcxproj|solutionrelative:task-6\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -20,13 +20,13 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "main.cpp",
-              "DocumentMoniker": "F:\\UniWork\\Github\\VisStudio\\task-4\\main.cpp",
-              "RelativeDocumentMoniker": "task-4\\main.cpp",
-              "ToolTip": "F:\\UniWork\\Github\\VisStudio\\task-4\\main.cpp",
-              "RelativeToolTip": "task-4\\main.cpp",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABEAAAAtAAAA",
+              "DocumentMoniker": "F:\\UniWork\\UniProgrammingFundamentals\\VisStudio\\task-6\\main.cpp",
+              "RelativeDocumentMoniker": "task-6\\main.cpp",
+              "ToolTip": "F:\\UniWork\\UniProgrammingFundamentals\\VisStudio\\task-6\\main.cpp",
+              "RelativeToolTip": "task-6\\main.cpp",
+              "ViewState": "AQIAAEgAAAAAAAAAAAAAAF0AAAAwAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-11-04T20:30:39.553Z",
+              "WhenOpened": "2024-11-26T17:23:24.331Z",
               "EditorCaption": ""
             }
           ]
